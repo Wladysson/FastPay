@@ -26,7 +26,6 @@ public class JwtTokenService {
         if (token == null || token.isBlank()) {
             throw new IllegalArgumentException("token must not be null or blank");
         }
-
         // placeholder decode (real implementation will verify signature)
         return Map.of(
                 "token", token,

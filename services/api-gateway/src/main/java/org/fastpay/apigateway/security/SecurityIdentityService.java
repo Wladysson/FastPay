@@ -1,24 +1,48 @@
-package com.fastpay.apigateway.domain.enums;
+package com.fastpay.apigateway.security;
 
-// Defines gateway permissions
-public enum PermissionType {
+import jakarta.enterprise.context.ApplicationScoped;
 
-    PAYMENT_CREATE,
-    PAYMENT_CAPTURE,
-    PAYMENT_CANCEL,
-    PAYMENT_REFUND,
+import java.util.Map;
 
-    MERCHANT_READ,
-    MERCHANT_CREATE,
-    MERCHANT_UPDATE,
+// Builds security identity from token claims
+@ApplicationScoped
+public class SecurityIdentityService {
 
-    TRANSACTION_READ,
+    public SecurityIdentity build(Map<String, Object> claims) {
 
-    SETTLEMENT_READ,
-    SETTLEMENT_PROCESS,
+        if (claims == null) {
+            throw new IllegalArgumentException("claims must not be null");
+        }
 
-    NOTIFICATION_SEND,
+        return new SecurityIdentity(
+                (String) claims.getOrDefault("sub", "unknown"),
+                (String) claims.getOrDefault("tenant", "unknown"),
+                (String) claims.getOrDefault("channel", "API")
+        );
+    }
 
-    ADMIN
+    public static class SecurityIdentity {
 
+        private final String userId;
+        private final String tenantId;
+        private final String channel;
+
+        public SecurityIdentity(String userId, String tenantId, String channel) {
+            this.userId = userId;
+            this.tenantId = tenantId;
+            this.channel = channel;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+
+        public String getTenantId() {
+            return tenantId;
+        }
+
+        public String getChannel() {
+            return channel;
+        }
+    }
 }

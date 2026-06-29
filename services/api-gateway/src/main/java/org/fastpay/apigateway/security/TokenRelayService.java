@@ -1,16 +1,23 @@
-package com.fastpay.apigateway.domain.enums;
+package com.fastpay.apigateway.security;
 
-// Defines downstream route types
-public enum RouteType {
+import jakarta.enterprise.context.ApplicationScoped;
 
-    MERCHANT,
+import java.util.HashMap;
+import java.util.Map;
 
-    PAYMENT,
+// Relays authentication token to downstream services
+@ApplicationScoped
+public class TokenRelayService {
 
-    TRANSACTION,
+    public Map<String, String> buildHeaders(String token) {
 
-    SETTLEMENT,
+        Map<String, String> headers = new HashMap<>();
 
-    NOTIFICATION
+        if (token != null && !token.isBlank()) {
+            headers.put("Authorization", "Bearer " + token);
+        }
+
+        return headers;
+    }
 
 }
