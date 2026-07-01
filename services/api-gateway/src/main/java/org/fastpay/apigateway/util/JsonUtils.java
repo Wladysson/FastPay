@@ -1,78 +1,40 @@
-package com.fastpay.apigateway.domain.valueobject;
+package com.fastpay.apigateway.util;
 
-import java.util.Objects;
-import java.util.UUID;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-// Represents an idempotency key
-public final class IdempotencyKey {
+public final class JsonUtils {
 
-    private static final int MAX_LENGTH = 255;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final String value;
-
-    private IdempotencyKey(String value) {
-        this.value = validate(value);
+    private JsonUtils() {
     }
 
-    public static IdempotencyKey generate() {
-        return new IdempotencyKey(UUID.randomUUID().toString());
-    }
+    public static String toJson(Object object) {
 
-    public static IdempotencyKey from(String value) {
-        return new IdempotencyKey(value);
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    // Validates the idempotency key
-    private String validate(String value) {
-
-        Objects.requireNonNull(
-                value,
-                "idempotencyKey must not be null"
-        );
-
-        String normalized = value.trim();
-
-        if (normalized.isBlank()) {
-            throw new IllegalArgumentException(
-                    "idempotencyKey must not be blank"
+        try {
+            return OBJECT_MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(
+                    "Failed to serialize object to JSON.",
+                    e
             );
         }
+    }
 
-        if (normalized.length() > MAX_LENGTH) {
-            throw new IllegalArgumentException(
-                    "idempotencyKey exceeds the maximum length of " + MAX_LENGTH
+    public static <T> T fromJson(String json, Class<T> type) {
+
+        try {
+            return OBJECT_MAPPER.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(
+                    "Failed to deserialize JSON.",
+                    e
             );
         }
-
-        return normalized;
     }
 
-    @Override
-    public boolean equals(Object object) {
-
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof IdempotencyKey other)) {
-            return false;
-        }
-
-        return value.equals(other.value);
+    public static ObjectMapper objectMapper() {
+        return OBJECT_MAPPER;
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
-    }
-
 }
